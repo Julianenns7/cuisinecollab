@@ -1,7 +1,7 @@
 import { db } from "@/app/util/firebase";
 import { query, getDocs, where, collection } from 'firebase/firestore';
 import React, { useState, useEffect} from 'react';
-export default function myRecipes({ showCreatePost, handleCreatePostClick }) {
+export default function myRecipes({ }) {
 
     const [yourRecipes, setYourRecipes] = useState([]);
 
