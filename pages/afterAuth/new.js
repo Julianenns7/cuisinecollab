@@ -1,12 +1,12 @@
 "use client";
 import { db } from '@/app/util/firebase';
-import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, limit, setDoc, doc } from 'firebase/firestore';
 import CreatePost from '@/app/components/createPost';
 import React, { useEffect, useState} from 'react';
 import { useRouter } from 'next/router';
 
 import Nav from '@/app/components/NavBar';
-export default function NewRecipes({ showCreatePost, handleCreatePostClick } ) {
+export default function NewRecipes() {
 
     
     const [latestRecipes, setLatestRecipes] = useState([]);
@@ -21,6 +21,7 @@ export default function NewRecipes({ showCreatePost, handleCreatePostClick } ) {
             const recipesQuery = query(recipesCollection, orderBy('timestamp', 'desc'), limit(20));
             const querySnapshot = await getDocs(recipesQuery);
             const mappedRecipes = querySnapshot.docs.map((recipeDoc) => ({
+                id: recipeDoc.id,
                 name: recipeDoc.data().r_name,
                 recipe: recipeDoc.data().r_desc,
                 user: recipeDoc.data().u_name,
@@ -31,7 +32,17 @@ export default function NewRecipes({ showCreatePost, handleCreatePostClick } ) {
 
 }, []);
 
+const handleFavoriteClick = async (recipeId, recipeName) => {
+     
+    const userFavoritesCollection = collection(db, 'Users', localStorage.email, 'favorites');
+  const recipeDocRef = doc(userFavoritesCollection, recipeId);
 
+  
+  await setDoc(recipeDocRef, {
+    
+    f_name: recipeName,
+  });
+};
 
 
     return (
@@ -48,9 +59,7 @@ export default function NewRecipes({ showCreatePost, handleCreatePostClick } ) {
                             <p class="line-break whitespace-pre-line break-all" >{recipe.recipe}</p>
                         </div>
                         <div class="flex justify-between">
-                            <button >
-                                favorite
-                            </button>
+                        <button onClick={() => handleFavoriteClick(recipe.id, recipe.name)}>Favorite</button>
                             <p>
                                {recipe.user} 
                             </p>

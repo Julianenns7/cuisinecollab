@@ -1,6 +1,6 @@
 "use client"
 import { db } from "@/app/util/firebase";
-import { query, getDocs, where, collection } from 'firebase/firestore';
+import { query, getDocs, where, collection, doc, setDoc } from 'firebase/firestore';
 import React, { useState, useEffect} from 'react';
 export default function MyRecipes({ }) {
 
@@ -13,6 +13,7 @@ export default function MyRecipes({ }) {
             const userRecipesQuery = query(recipesCollection, where('u_email', '==', email) );
             const userRecipesSnapshot = await getDocs(userRecipesQuery);
             const userRecipes = userRecipesSnapshot.docs.map((recipeDoc) => ({
+                id: recipeDoc.id,
                 name: recipeDoc.data().r_name,
                 recipe: recipeDoc.data().r_desc,
             }))
@@ -20,6 +21,18 @@ export default function MyRecipes({ }) {
     }
     fetchYourRecipes();
 }, []);
+
+const handleFavoriteClick = async (recipeId, recipeName) => {
+    
+    const userFavoritesCollection = collection(db, 'Users', localStorage.email, 'favorites');
+  const recipeDocRef = doc(userFavoritesCollection, recipeId);
+
+  
+  await setDoc(recipeDocRef, {
+    
+    f_name: recipeName,
+  });
+};
 return (
     <div>
         
@@ -34,9 +47,7 @@ return (
                         <p class="line-break whitespace-pre-line break-all" >{recipe.recipe}</p>
                     </div>
                     <div class="flex justify-between">
-                        <button >
-                            favorite
-                        </button>
+                    <button onClick={() => handleFavoriteClick(recipe.id, recipe.name)}>Favorite</button>
                         
                     </div>
                 </div>
